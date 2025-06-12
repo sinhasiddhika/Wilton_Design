@@ -1,0 +1,6 @@
+git+https://github.com/sedthh/pyxelate.git
+scikit-image
+matplotlib
+opencv-python
+pillow
+numpy
