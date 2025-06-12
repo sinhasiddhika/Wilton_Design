@@ -1,57 +1,55 @@
-from os import path
+import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import io
 from pyxelate import Pyx
 from PIL import Image
 import cv2
+import os
+from io import BytesIO
 
-SAVE_IMAGES = True  # To allow saving
+# Streamlit page settings
+st.set_page_config(page_title="Pixelate Image with Pyxelate", layout="centered")
 
-def plot(subplots=[], save_as=None, fig_h=9):
-    """Plotting helper function"""
-    fig, ax = plt.subplots(int(np.ceil(len(subplots) / 3)),
-                           min(3, len(subplots)),
-                           figsize=(18, fig_h))
-    if len(subplots) == 1:
-        ax = [ax]
-    else:
-        ax = ax.ravel()
-    for i, subplot in enumerate(subplots):
-        if isinstance(subplot, dict):
-            ax[i].set_title(subplot["title"])
-            ax[i].imshow(subplot["image"])
-        else:
-            ax[i].imshow(subplot)
-    fig.tight_layout()
-    if save_as is not None and SAVE_IMAGES:
-        plt.savefig(path.join("./", save_as), transparent=True)
-    plt.show()
+st.title("🎨 Pixelate Your Image with Pyxelate")
 
-# Load the image
-image = io.imread("14.jpg")  # Make sure this path is correct
+# Upload section
+uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
-# Desired output dimensions
-desired_width = 128
-desired_height = 128
+if uploaded_file:
+    # Load and show original image
+    image = Image.open(uploaded_file).convert("RGB")
+    image_np = np.array(image)
+    st.image(image, caption="Original Image", use_column_width=True)
 
-# Downsample factor
-h, w = image.shape[:2]
-downsample_by = max(w // desired_width, h // desired_height)
+    # Set parameters
+    desired_width = st.slider("Desired Width", min_value=16, max_value=512, value=128)
+    desired_height = st.slider("Desired Height", min_value=16, max_value=512, value=128)
+    palette = st.slider("Number of Colors (Palette)", min_value=4, max_value=16, value=7)
 
-# Pixelation
-palette = 7
-pyx = Pyx(factor=downsample_by, palette=palette)
-pyx.fit(image)
-pixel_art = pyx.transform(image)
+    # Process button
+    if st.button("Pixelate Image"):
+        # Downsampling factor
+        h, w = image_np.shape[:2]
+        downsample_by = max(w // desired_width, h // desired_height)
 
-# Resize to target
-pixel_art_resized = cv2.resize(pixel_art, (desired_width, desired_height), interpolation=cv2.INTER_NEAREST)
+        # Pixelate
+        pyx = Pyx(factor=downsample_by, palette=palette)
+        pyx.fit(image_np)
+        pixel_art = pyx.transform(image_np)
 
-# Save result
-output_path = "pixel_art_output.png"
-io.imsave(output_path, pixel_art_resized)
+        # Resize to target
+        pixel_art_resized = cv2.resize(pixel_art, (desired_width, desired_height), interpolation=cv2.INTER_NEAREST)
 
-# Show original vs pixelated
-plot([image, pixel_art_resized], save_as="comparison_plot.png")
-print(f"Pixel art saved to: {output_path}")
+        # Save output
+        output_path = "pixel_art_output.png"
+        io.imsave(output_path, pixel_art_resized)
+
+        st.image(pixel_art_resized, caption="🧩 Pixelated Image", use_column_width=True)
+
+        # Download button
+        buf = BytesIO()
+        Image.fromarray(pixel_art_resized).save(buf, format="PNG")
+        byte_im = buf.getvalue()
+
+        st.download_button("Download Pixelated Image", data=byte_im, file_name="pixel_art_output.png", mime="image/png")
