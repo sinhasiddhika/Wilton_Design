@@ -1,8 +1,7 @@
-git+https://github.com/sedthh/pyxelate.git
-scikit-image
-matplotlib
+streamlit
 opencv-python
 pillow
+matplotlib
+scikit-image
 numpy
-streamlit
- 
+git+https://github.com/sedthh/pyxelate.git
