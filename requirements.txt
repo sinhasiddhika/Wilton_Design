@@ -1,8 +1,6 @@
 streamlit
-opencv-python
+numpy
 pillow
 matplotlib
 scikit-image
-numpy
-git+https://github.com/sedthh/pyxelate.git
-
+opencv-python-headless
