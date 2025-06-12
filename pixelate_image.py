@@ -43,7 +43,7 @@ if uploaded_file:
 
         # Save output
         output_path = "pixel_art_output.png"
-        io.imsave(output_path, pixel_art_resized)
+        Image.fromarray(pixel_art_resized).save(output_path)
 
         st.image(pixel_art_resized, caption="🧩 Pixelated Image", use_column_width=True)
 
