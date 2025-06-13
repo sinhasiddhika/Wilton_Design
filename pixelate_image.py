@@ -39,7 +39,7 @@ if uploaded_file is not None:
     byte_im = buf.getvalue()
 
     st.download_button(
-        label="📥 Download Pixelated Image",
+        label="Download Pixelated Image",
         data=byte_im,
         file_name="pixel_art.png",
         mime="image/png"
